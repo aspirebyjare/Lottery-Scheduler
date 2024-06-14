@@ -280,8 +280,8 @@ int
 fork(void)
 {
   int i, pid;
-  struct proc *np;
-  struct proc *p = myproc();
+  struct proc *np;           // points to child process
+  struct proc *p = myproc(); // points to parent process
 
   // Allocate process.
   if((np = allocproc()) == 0){
@@ -309,17 +309,18 @@ fork(void)
   np->cwd = idup(p->cwd);
 
   safestrcpy(np->name, p->name, sizeof(p->name));
-
+        // //
   pid = np->pid;
+  np->token = 1;      //CUSTOM sets child's num of toke to 1
 
   release(&np->lock);
 
   acquire(&wait_lock);
-  np->parent = p;
+  np->parent = p;               //sets childs parent field to parent
   release(&wait_lock);
 
   acquire(&np->lock);
-  np->state = RUNNABLE;
+  np->state = RUNNABLE;         //sets childs stat to runnable
   release(&np->lock);
 
   return pid;
