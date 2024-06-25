@@ -446,14 +446,15 @@ wait(uint64 addr)
 void
 scheduler(void)
 {
-  struct proc *p;
-  struct cpu *c = mycpu();
-  
-  c->proc = 0;
-  for(;;){
-    // Avoid deadlock by ensuring that devices can interrupt.
-    intr_on();
+    struct proc *p;
+    struct cpu *c = mycpu();
+    c->proc = 0;
 
+    for(;;) {
+        // Avoid deadlock by ensuring that devices can interrupt.
+        intr_on();
+/*  //----------------------------------------------------------
+    //ROUND ROBIN SCHEDULER
     for(p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
       if(p->state == RUNNABLE) {
@@ -468,9 +469,45 @@ scheduler(void)
         // It should have changed its p->state before coming back.
         c->proc = 0;
       }
-      release(&p->lock);
+//-------------------------------------------------- */  
+//--------------------------------------------------------------------
+        // LOTTERY SCHEDULER
+        int totalTokens = 0;
+        // STEP 1:  Iterate over the list of processes in the proc array
+        // to compute the total number of allocated token
+        for(p = proc; p < &proc[NPROC]; p++) {
+            acquire(&p->lock);
+            if(p->state == RUNNABLE) {
+                totalTokens += p->token; // if its runnable add tokens to sum
+            }
+            release(&p->lock);
+        }
+
+        // STEP 2: generates a random number in the range [0, totalTokens]
+        int winningThreshold = copied_rand(&seed) % totalTokens;
+        int currentTokens = 0;
+
+        // STEP 3: Iterate over the proc array with a counting the number of tokens
+        // held by RUNNABLE processes and storing it in currentTokens
+        for(p = proc; p < &proc[NPROC]; p++) {
+            acquire(&p->lock);
+            if(p->state == RUNNABLE) {
+                currentTokens += p->token;
+                 //Schedule the first process with currentTokens > winningThreshold 
+                if(currentTokens > winningThreshold) {
+                    p->state = RUNNING;
+                    c->proc = p;
+                    swtch(&c->context, &p->context);
+
+                    c->proc = 0;
+                    release(&p->lock);
+                    break; // Exit the loop after finding the winning process
+                }
+            }
+//--------------------------------------------------           
+            release(&p->lock);
+        }
     }
-  }
 }
 
 // Switch to scheduler.  Must hold only p->lock
