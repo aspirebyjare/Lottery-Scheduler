@@ -483,7 +483,7 @@ scheduler(void)
             release(&p->lock);
         }
 
-        // STEP 2: generates a random number in the range [0, totalTokens]
+        // STEP 2: Generate a random number in the range [0, totalTokens]
         int winningThreshold = copied_rand(&seed) % totalTokens;
         int currentTokens = 0;
 
@@ -505,7 +505,7 @@ scheduler(void)
                 }
             }
 //--------------------------------------------------           
-            release(&p->lock);
+            release(&p->lock); // release for non chosen processes
         }
     }
 }
