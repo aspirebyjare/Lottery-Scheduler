@@ -89,3 +89,23 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+// Set the num of tokens for the active process.
+// Success returns 0 and failure returns -1
+uint64
+sys_setToken(void)
+{
+    struct proc *p = myproc();
+    int token = p->trapframe->a0; // pulls arg set in reg
+
+    // If not between 1 to 32 -> error
+    if (token < 1 || token > 32)
+    {
+        
+        return -1; // do not update
+    }
+    // if in valid range set the token value
+    p->token = token;
+
+    return 0;
+}

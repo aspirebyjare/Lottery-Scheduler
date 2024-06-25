@@ -22,6 +22,8 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+int setToken(int token); // custom
+
 
 // ulib.c
 int stat(const char*, struct stat*);
