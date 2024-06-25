@@ -34,7 +34,22 @@ sys_wait(void)
   argaddr(0, &p);
   return wait(p);
 }
-
+//--------------------------------------Custom--------------------------------------------
+uint64
+sys_schedDisp(void)
+{
+    uint64 address;
+    
+    argaddr(0,&address);
+    //if invalid address: error
+    if(address < 0)
+    {
+        return -1; 
+    }
+    
+    return schedDisp(address);
+}
+//----------------------------------------------------------------------------------------
 uint64
 sys_sbrk(void)
 {

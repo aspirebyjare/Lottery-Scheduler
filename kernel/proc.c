@@ -5,6 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#include "schedInfo.h" // custom
 
 struct cpu cpus[NCPU];
 
@@ -13,7 +14,14 @@ struct proc proc[NPROC];
 struct proc *initproc;
 
 int nextpid = 1;
-unsigned long seed = 1;
+
+//----------------------------------------------------------------------------------------
+//following are all custom globals for part 5 of pdf
+unsigned long seed = 1; // custom
+struct schedInfo schedInfos[32];// custom
+int schedIndex = 0; // custom 
+//----------------------------------------------------------------------------------------
+
 struct spinlock pid_lock;
 
 extern void forkret(void);
@@ -56,6 +64,15 @@ procinit(void)
       initlock(&p->lock, "proc");
       p->state = UNUSED;
       p->kstack = KSTACK((int) (p - proc));
+    
+    // Custom
+    // initialize schedInfos pid values to -1 
+    // later an entry with pid -1 will mean invalid
+    for (int i = 0; i <32; i++)
+    {
+        schedInfos[i].pid = -1;
+    }
+
   }
 }
 
@@ -450,7 +467,8 @@ scheduler(void)
     struct cpu *c = mycpu();
     c->proc = 0;
 
-    for(;;) {
+    for(;;) 
+    {
         // Avoid deadlock by ensuring that devices can interrupt.
         intr_on();
 /*  //----------------------------------------------------------
@@ -475,12 +493,19 @@ scheduler(void)
         int totalTokens = 0;
         // STEP 1:  Iterate over the list of processes in the proc array
         // to compute the total number of allocated token
-        for(p = proc; p < &proc[NPROC]; p++) {
+        for(p = proc; p < &proc[NPROC]; p++)    
+        {
             acquire(&p->lock);
-            if(p->state == RUNNABLE) {
+            if(p->state == RUNNABLE) 
+            {
                 totalTokens += p->token; // if its runnable add tokens to sum
             }
             release(&p->lock);
+        }
+        // if no processes are runnable skip to next iteration
+        if(totalTokens == 0) 
+        {
+            continue; 
         }
 
         // STEP 2: Generate a random number in the range [0, totalTokens]
@@ -489,14 +514,25 @@ scheduler(void)
 
         // STEP 3: Iterate over the proc array with a counting the number of tokens
         // held by RUNNABLE processes and storing it in currentTokens
-        for(p = proc; p < &proc[NPROC]; p++) {
+        for(p = proc; p < &proc[NPROC]; p++) 
+        {
             acquire(&p->lock);
-            if(p->state == RUNNABLE) {
+            if(p->state == RUNNABLE) 
+            {
                 currentTokens += p->token;
                  //Schedule the first process with currentTokens > winningThreshold 
-                if(currentTokens > winningThreshold) {
+                if(currentTokens > winningThreshold) 
+                {
                     p->state = RUNNING;
                     c->proc = p;
+//----------------------------------------------------------------------------------------
+                    //update schedInfos array
+                        //inc array
+                    schedIndex = (schedIndex + 1) % 32;
+                        //update fields
+                    schedInfos[schedIndex].pid = pid;
+                    schedInfos[schedIndex].tokens = tokens;
+//----------------------------------------------------------------------------------------
                     swtch(&c->context, &p->context);
 
                     c->proc = 0;
@@ -721,7 +757,7 @@ procdump(void)
   }
 }
 
-// from FreeBSD.
+// CUSTOM
 int
 copied_rand(unsigned long *ctx)
 {
@@ -747,3 +783,14 @@ copied_rand(unsigned long *ctx)
     *ctx = x;
     return (x);
 }
+
+// Custom
+// Displays past execution schedule
+int schedDisp(uint64 address) 
+{
+    struct proc *p = myproc();
+    // copyout will return our error status for us
+    return copyout(p->pagetable, addr, (char *)schedInfos, sizeof(schedInfos));
+}
+
+

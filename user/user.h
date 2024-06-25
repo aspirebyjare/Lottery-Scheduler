@@ -22,7 +22,9 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
-int setToken(int token); // custom
+// ---- Custom ------
+int setToken(int token); 
+
 
 
 // ulib.c
