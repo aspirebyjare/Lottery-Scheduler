@@ -132,8 +132,8 @@ UPROGS=\
 	$U/_grind\
 	$U/_wc\
 	$U/_zombie\
-    $U/_primeCount\ # custom 
-    $U/_schTest\ # custom 
+    $U/_primeCount\
+    $U/_schTest\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

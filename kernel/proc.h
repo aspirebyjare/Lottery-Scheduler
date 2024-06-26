@@ -106,3 +106,6 @@ struct proc {
   char name[16];               // Process name (debugging)
   uint64 token;                //CUSTOM- added field for token
 };
+
+
+int schedDisp(uint64 address); // custom

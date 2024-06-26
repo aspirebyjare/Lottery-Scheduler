@@ -20,6 +20,8 @@ int nextpid = 1;
 unsigned long seed = 1; // custom
 struct schedInfo schedInfos[32];// custom
 int schedIndex = 0; // custom 
+
+int copied_rand(unsigned long *ctx);
 //----------------------------------------------------------------------------------------
 
 struct spinlock pid_lock;
@@ -471,7 +473,7 @@ scheduler(void)
     {
         // Avoid deadlock by ensuring that devices can interrupt.
         intr_on();
-/*  //----------------------------------------------------------
+///*  //----------------------------------------------------------
     //ROUND ROBIN SCHEDULER
     for(p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
@@ -481,14 +483,25 @@ scheduler(void)
         // before jumping back to us.
         p->state = RUNNING;
         c->proc = p;
+
+//----------------------------------------------------------------------------------------
+                    //update schedInfos array
+                        //inc array
+                    schedIndex = (schedIndex + 1) % 32;
+                        //update fields
+                    schedInfos[schedIndex].pid = p->pid;
+                    schedInfos[schedIndex].tokens = p->token;
+//----------------------------------------------------------------------------------------
+
         swtch(&c->context, &p->context);
 
         // Process is done running for now.
         // It should have changed its p->state before coming back.
         c->proc = 0;
       }
-//-------------------------------------------------- */  
+//-------------------------------------------------- //*/  
 //--------------------------------------------------------------------
+        /* 
         // LOTTERY SCHEDULER
         int totalTokens = 0;
         // STEP 1:  Iterate over the list of processes in the proc array
@@ -530,8 +543,8 @@ scheduler(void)
                         //inc array
                     schedIndex = (schedIndex + 1) % 32;
                         //update fields
-                    schedInfos[schedIndex].pid = pid;
-                    schedInfos[schedIndex].tokens = tokens;
+                    schedInfos[schedIndex].pid = p->pid;
+                    schedInfos[schedIndex].tokens = p->token;
 //----------------------------------------------------------------------------------------
                     swtch(&c->context, &p->context);
 
@@ -540,7 +553,7 @@ scheduler(void)
                     break; // Exit the loop after finding the winning process
                 }
             }
-//--------------------------------------------------           
+//--------------------------------------------------    */       
             release(&p->lock); // release for non chosen processes
         }
     }
@@ -790,7 +803,7 @@ int schedDisp(uint64 address)
 {
     struct proc *p = myproc();
     // copyout will return our error status for us
-    return copyout(p->pagetable, addr, (char *)schedInfos, sizeof(schedInfos));
+    return copyout(p->pagetable, address, (char *)schedInfos, sizeof(schedInfos));
 }
 
 

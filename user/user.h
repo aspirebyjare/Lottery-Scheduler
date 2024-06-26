@@ -24,7 +24,7 @@ int sleep(int);
 int uptime(void);
 // ---- Custom ------
 int setToken(int token); 
-
+int schedDisp(uint64 address);
 
 
 // ulib.c

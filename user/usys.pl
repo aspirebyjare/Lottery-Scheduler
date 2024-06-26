@@ -37,3 +37,4 @@ entry("sbrk");
 entry("sleep");
 entry("uptime");
 entry("setToken"); # custom
+entry("schedDisp"); # custom
