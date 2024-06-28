@@ -3,7 +3,7 @@
 #include "user/user.h"
 
 #define LIMIT 50000
-#define MAX_PROCESS 1 
+#define MAX_PROCESS 12 
 
 // returns number of primes between 2 and a passed int
 int primeCount(int limit)
@@ -89,7 +89,7 @@ int main()
 
             //call primeCount() 
             int primes = primeCount(LIMIT);
-            wait(0);// used to stop print statements from jumbling
+            //wait(0);// used to stop print statements from jumbling
             printf("child pid = %d: total = %d\n", getpid(), primes);
 
             // call schedDisp to retrive the last 32 processes
@@ -107,17 +107,17 @@ int main()
                     printf("%d ", processes[j].pid);
                 }
             }
-            printf("\n");
+            printf("\n\n");
 
             exit(0); 
         }
     }
 
     // Parent processes
-    //for (int i = 0; i < MAX_PROCESS; i++) 
-    //{
-       //wait(0);
-    //}
+    for (int i = 0; i < MAX_PROCESS; i++) 
+    {
+       wait(0);
+    }
 
     //printf("parent Done\n");
     exit(0);

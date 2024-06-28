@@ -462,6 +462,8 @@ wait(uint64 addr)
 //  - swtch to start running that process.
 //  - eventually that process transfers control
 //    via swtch back to the scheduler.
+// RR and Lottery Scheduler implemented, comment out
+// the undesired scheduler
 void
 scheduler(void)
 {
@@ -469,15 +471,18 @@ scheduler(void)
     struct cpu *c = mycpu();
     c->proc = 0;
 
+
     for(;;) 
     {
         // Avoid deadlock by ensuring that devices can interrupt.
         intr_on();
-///*  //----------------------------------------------------------
+/*  //----------------------------------------------------------
     //ROUND ROBIN SCHEDULER
-    for(p = proc; p < &proc[NPROC]; p++) {
+    for(p = proc; p < &proc[NPROC]; p++) 
+    {
       acquire(&p->lock);
-      if(p->state == RUNNABLE) {
+      if(p->state == RUNNABLE) 
+      {
         // Switch to chosen process.  It is the process's job
         // to release its lock and then reacquire it
         // before jumping back to us.
@@ -499,9 +504,12 @@ scheduler(void)
         // It should have changed its p->state before coming back.
         c->proc = 0;
       }
-//-------------------------------------------------- //*/  
+      release(&p->lock); // release for non chosen processes
+//--------------------------------------------------
+*/
+
 //--------------------------------------------------------------------
-        /* 
+///* 
         // LOTTERY SCHEDULER
         int totalTokens = 0;
         // STEP 1:  Iterate over the list of processes in the proc array
@@ -511,20 +519,24 @@ scheduler(void)
             acquire(&p->lock);
             if(p->state == RUNNABLE) 
             {
+                //printf("\n______TEST-------\n"); //test
                 totalTokens += p->token; // if its runnable add tokens to sum
+                //printf("here: totalTokens: %d\n -- PID: %d", totalTokens, schedInfos[schedIndex].pid ); //test
             }
             release(&p->lock);
         }
         // if no processes are runnable skip to next iteration
         if(totalTokens == 0) 
         {
-            continue; 
+            totalTokens = 1; 
+            //printf("here\n"); //test
+           // printf("2nd: totalTokens: %d\n -- PID: %d", totalTokens, schedInfos[schedIndex].pid ); //test
         }
 
         // STEP 2: Generate a random number in the range [0, totalTokens]
         int winningThreshold = copied_rand(&seed) % totalTokens;
         int currentTokens = 0;
-
+           //printf("\n2nd: winTick: %d\n -- currTok: %d", winningThreshold, currentTokens ); //test
         // STEP 3: Iterate over the proc array with a counting the number of tokens
         // held by RUNNABLE processes and storing it in currentTokens
         for(p = proc; p < &proc[NPROC]; p++) 
@@ -534,8 +546,9 @@ scheduler(void)
             {
                 currentTokens += p->token;
                  //Schedule the first process with currentTokens > winningThreshold 
-                if(currentTokens > winningThreshold) 
+                if(currentTokens >= winningThreshold) 
                 {
+                    //printf("\n switching context%d\n", schedInfos[schedIndex].pid);
                     p->state = RUNNING;
                     c->proc = p;
 //----------------------------------------------------------------------------------------
@@ -553,8 +566,10 @@ scheduler(void)
                     break; // Exit the loop after finding the winning process
                 }
             }
-//--------------------------------------------------    */       
-            release(&p->lock); // release for non chosen processes
+            release(&p->lock); // release for non chosen processes     
+        
+//--------------------------------------------------   
+//*/
         }
     }
 }
