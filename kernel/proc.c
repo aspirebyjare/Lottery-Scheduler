@@ -62,18 +62,21 @@ procinit(void)
   
   initlock(&pid_lock, "nextpid");
   initlock(&wait_lock, "wait_lock");
-  for(p = proc; p < &proc[NPROC]; p++) {
-      initlock(&p->lock, "proc");
-      p->state = UNUSED;
-      p->kstack = KSTACK((int) (p - proc));
-    
+
     // Custom
     // initialize schedInfos pid values to -1 
     // later an entry with pid -1 will mean invalid
     for (int i = 0; i <32; i++)
     {
         schedInfos[i].pid = -1;
+        schedInfos[i].tokens = 0;
     }
+
+  for(p = proc; p < &proc[NPROC]; p++) 
+  {
+      initlock(&p->lock, "proc");
+      p->state = UNUSED;
+      p->kstack = KSTACK((int) (p - proc));
 
   }
 }
@@ -548,21 +551,25 @@ scheduler(void)
                  //Schedule the first process with currentTokens > winningThreshold 
                 if(currentTokens >= winningThreshold) 
                 {
-                    //printf("\n switching context%d\n", schedInfos[schedIndex].pid);
+                    //printf("\n switching context-%d\n", currentTokens);
                     p->state = RUNNING;
                     c->proc = p;
 //----------------------------------------------------------------------------------------
                     //update schedInfos array
-                        //inc array
-                    schedIndex = (schedIndex + 1) % 32;
+
                         //update fields
                     schedInfos[schedIndex].pid = p->pid;
                     schedInfos[schedIndex].tokens = p->token;
+//printf("schedIndex: %d, pid: %d, tokens: %d\n", schedIndex, schedInfos[schedIndex].pid, schedInfos[schedIndex].tokens);
+                        //inc array
+                    schedIndex = (schedIndex + 1) % 32;
+
 //----------------------------------------------------------------------------------------
                     swtch(&c->context, &p->context);
 
                     c->proc = 0;
                     release(&p->lock);
+
                     break; // Exit the loop after finding the winning process
                 }
             }

@@ -3,7 +3,7 @@
 #include "user/user.h"
 
 #define LIMIT 50000
-#define MAX_PROCESS 12 
+#define MAX_PROCESS 12
 
 // returns number of primes between 2 and a passed int
 int primeCount(int limit)
@@ -83,41 +83,54 @@ int main()
     {
         if ((childrenPIDs[i] = fork()) == 0) 
         {
+            //printf("\n-----PID: %d start-----\n", getpid());
             // Child process
             int token = tokens[i % 3]; 
             setToken(token); 
+            printf("\n%d set toke: %d", getpid(), token);
 
             //call primeCount() 
             int primes = primeCount(LIMIT);
+            primes ++;
+            primes --;
             //wait(0);// used to stop print statements from jumbling
-            printf("child pid = %d: total = %d\n", getpid(), primes);
-
+            //printf("child pid = %d | total = %d\n", getpid(), primes);
+            
+            printf("\nchild pid = %d - ", getpid());
             // call schedDisp to retrive the last 32 processes
             struct schedInfo processes[32];
             schedDisp((uint64)processes);
 
-            printf("last 32 processes scheduled (Most recent to least recent)\n");
+            //printf("child pid = %d | total = %d\n", getpid(), primes);
+
+            //wait(0);
+            //printf("last 32 processes scheduled (Most recent to least recent)\n");
             for (int j = 0; j < 32; j++) 
             {
-               // printf(" ( %d )",processes[j].pid ); // test
+                //wait(0);
+                //printf("%d: ",getpid()); // test
                 if (processes[j].pid != -1) 
                 {
                     //printf("In procs loop\n"); // test
-                    wait(0);
+                    //schedDisp((uint64)processes);
                     printf("%d ", processes[j].pid);
                 }
             }
             printf("\n\n");
-
+            //printf("\n-----PID: %d Finish-----\n", getpid());
             exit(0); 
         }
+        else{
+            wait(0);        
+        }
+
     }
 
     // Parent processes
-    for (int i = 0; i < MAX_PROCESS; i++) 
-    {
-       wait(0);
-    }
+    //for (int i = 0; i < MAX_PROCESS; i++) 
+    //{
+       //wait(0);
+    //}
 
     //printf("parent Done\n");
     exit(0);
