@@ -134,6 +134,7 @@ UPROGS=\
 	$U/_zombie\
     $U/_primeCount\
     $U/_schTest\
+    $U/_primeCount\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

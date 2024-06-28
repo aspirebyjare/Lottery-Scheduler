@@ -2,6 +2,7 @@
 #include "kernel/stat.h"
 #include "user/user.h"
 
+
 #define LIMIT 50000
 
 // returns number of primes between 2 and a passed int
@@ -28,6 +29,7 @@ int primeCount(int limit)
     }
     return (numOfPrimes);
 }
+
 int main()
 {
     int howManyPrimes = primeCount(LIMIT);

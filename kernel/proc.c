@@ -479,7 +479,7 @@ scheduler(void)
     {
         // Avoid deadlock by ensuring that devices can interrupt.
         intr_on();
-/*  //----------------------------------------------------------
+///*  //----------------------------------------------------------
     //ROUND ROBIN SCHEDULER
     for(p = proc; p < &proc[NPROC]; p++) 
     {
@@ -509,10 +509,10 @@ scheduler(void)
       }
       release(&p->lock); // release for non chosen processes
 //--------------------------------------------------
-*/
+//*/
 
 //--------------------------------------------------------------------
-///* 
+/* 
         // LOTTERY SCHEDULER
         int totalTokens = 0;
         // STEP 1:  Iterate over the list of processes in the proc array
@@ -532,14 +532,13 @@ scheduler(void)
         if(totalTokens == 0) 
         {
             totalTokens = 1; 
-            //printf("here\n"); //test
-           // printf("2nd: totalTokens: %d\n -- PID: %d", totalTokens, schedInfos[schedIndex].pid ); //test
+
         }
 
         // STEP 2: Generate a random number in the range [0, totalTokens]
         int winningThreshold = copied_rand(&seed) % totalTokens;
         int currentTokens = 0;
-           //printf("\n2nd: winTick: %d\n -- currTok: %d", winningThreshold, currentTokens ); //test
+ 
         // STEP 3: Iterate over the proc array with a counting the number of tokens
         // held by RUNNABLE processes and storing it in currentTokens
         for(p = proc; p < &proc[NPROC]; p++) 
@@ -550,20 +549,18 @@ scheduler(void)
                 currentTokens += p->token;
                  //Schedule the first process with currentTokens > winningThreshold 
                 if(currentTokens >= winningThreshold) 
-                {
-                    //printf("\n switching context-%d\n", currentTokens);
+                {   
+                    // test to verify randomness
+                    //printf("\n%d, has %d tokens\n", p->pid, p->token);
                     p->state = RUNNING;
                     c->proc = p;
 //----------------------------------------------------------------------------------------
                     //update schedInfos array
-
                         //update fields
                     schedInfos[schedIndex].pid = p->pid;
                     schedInfos[schedIndex].tokens = p->token;
-//printf("schedIndex: %d, pid: %d, tokens: %d\n", schedIndex, schedInfos[schedIndex].pid, schedInfos[schedIndex].tokens);
                         //inc array
                     schedIndex = (schedIndex + 1) % 32;
-
 //----------------------------------------------------------------------------------------
                     swtch(&c->context, &p->context);
 
@@ -576,7 +573,7 @@ scheduler(void)
             release(&p->lock); // release for non chosen processes     
         
 //--------------------------------------------------   
-//*/
+*/
         }
     }
 }
@@ -825,7 +822,10 @@ int schedDisp(uint64 address)
 {
     struct proc *p = myproc();
     // copyout will return our error status for us
-    return copyout(p->pagetable, address, (char *)schedInfos, sizeof(schedInfos));
+    copyout(p->pagetable, address, (char *)schedInfos, sizeof(schedInfos));
+    // returning the schedIndex to keep track of 
+    // where the start of the array is
+    return schedIndex;
 }
 
 
