@@ -1,3 +1,70 @@
+# Lottery Scheduler
+
+## Overview
+For this project, we were tasked with implementing a **Lottery Scheduler** within the xv6 operating system. Lottery scheduling is a probabilistic CPU scheduling algorithm where each process is assigned a number of lottery tickets. The CPU is then allocated to processes based on a random lottery draw, where the chances of a process being selected are proportional to the number of tickets it holds.
+
+## Features
+- Fair scheduling based on a random lottery system.
+- Allows for varying priorities by assigning different amounts of tickets to processes.
+- Demonstrates the behavior of a lottery scheduler in a controlled operating system environment.
+
+## How It Works
+1. Each process is given a certain number of lottery tickets.
+2. The scheduler randomly draws a ticket, and the process holding the winning ticket gets to run.
+3. Processes with more tickets have a higher probability of being selected, while processes with fewer tickets have a lower probability.
+
+### Example
+- Process A has 10 tickets.
+- Process B has 20 tickets.
+- Process C has 5 tickets.
+
+In this case, Process B has the highest chance of winning the lottery and getting CPU time, while Process C has the lowest.
+
+## Screenshots
+
+Here are screenshots from tests showing the lottery scheduler in action:
+
+### Round-Robin Execution Test
+
+![Round Robin Test](./RoundRobin.png)
+
+### Lottery Scheduler Execution Test
+
+![Lottery Scheduler Test](./lotteryScheduler.png)
+
+## How to Run
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/yourusername/lottery-scheduler.git
+    ```
+
+2. Compile the xv6 OS and your scheduler modifications:
+    ```bash
+    make
+    ```
+
+3. Run xv6 with the scheduler:
+    ```bash
+    ./xv6
+    ```
+
+4. Test the lottery scheduler by executing the test program:
+    ```bash
+    schTest
+    ```
+
+## Project Details
+This project is part of a course assignment for operating systems at my university and was developed as a custom CPU scheduling algorithm for the xv6 operating system.
+
+The lottery scheduler is designed to demonstrate probabilistic scheduling methods in a simulated environment, offering insight into process management and scheduling algorithms. While this project is based on the xv6 OS, it serves as an educational tool rather than a production-level implementation.
+
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+
+
+# The Initial ReadMe and Full Acknowlgements for xv6:
+
 xv6 is a re-implementation of Dennis Ritchie's and Ken Thompson's Unix
 Version 6 (v6).  xv6 loosely follows the structure and style of v6,
 but is implemented for a modern RISC-V multiprocessor using ANSI C.
