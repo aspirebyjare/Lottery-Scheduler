@@ -21,7 +21,9 @@ For this project, we were tasked with implementing a **Lottery Scheduler** withi
 In this case, Process B has the highest chance of winning the lottery and getting CPU time, while Process C has the lowest.
 
 ## Detailed walk through of my changes made to implement the lottery scheduler
-###    1.) Update the PCB     2.)Update fork() system call     3.)Create setToken syscall 
+### 1.) Update the PCB     
+### 2.)Update fork() system call     
+### 3.)Create setToken syscall 
 - Added line to kernel/proc.h:   uint64 token;  
 - Added line to kernel/proc.c: np->token = 1 
 - Add line to user/user.h: int setToken(int token); // custom 
