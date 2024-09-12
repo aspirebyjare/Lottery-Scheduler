@@ -20,6 +20,40 @@ For this project, we were tasked with implementing a **Lottery Scheduler** withi
 
 In this case, Process B has the highest chance of winning the lottery and getting CPU time, while Process C has the lowest.
 
+## Detailed walk through of my changes made to implement the lottery scheduler
+###    1.) Update the PCB     2.)Update fork() system call     3.)Create setToken syscall 
+            Added line to kernel/proc.h:   uint64 token;  
+            Added line to kernel/proc.c: np->token = 1 
+            Add line to user/user.h: int setToken(int token); // custom 
+            Add line to user/usys.pl entry("setToken"); # custom 
+            Add line to kernel/syscall.h: #define SYS_setToken 22 // custom 
+            Add line to kernel/syscall.c: [SYS_setToken] sys_setToken, 
+            Implement func in kernel/sysproc.c  
+###    4.) Implement Lottery Scheduling  
+            Broke problem into three parts 
+            STEP 1: Iterate over the list of processes in the proc array to compute the totalTokens  
+            STEP 2: Generate a random number in the range [0, totalTokens] and save the orignal index for orientation in the circular array 
+            STEP 3: Iterate over the proc array with a counting the number of tokens held by RUNNABLE processes and storing it in currentTokens 
+###    5.) Implement schedDisp() syscall 
+            Created kernel/schedInfo.h and defined struct of schedInfo 
+            Included schedInfo.h in kernel/proc.c 
+            Add line to kernel/proc.c: struct schedInfo schedInfos[32];// custom 
+            Adjusted prcoInit to initialize the schdeInfo array's pid's to -1 
+            Included a schedDisp() implementation on proc.c that called the syscall from sysproc. 
+               Used copyout() to pass schedInfo to user space 
+               Returned the schedIndex for orientation use in the circular array in schTest  
+###    6.) Implement a user test program 
+            Made a program called primeCount.c which utilizes the function primeCount() to count all the Prime numbers between 2 and a passed value limit          	
+            Made schTest.c 
+                fork() MAX_PROCESS amount of children             
+            The chlidren:              
+                1.) Call primecount  
+                2.)	Then they call schedDisp to retrive the last 32 processes and save the return value and use it to denote the front of the list 
+                3.)	Finally for each iteration take the passedIndex and add the current iteration to get the index to access the pids in order             
+            The parent:             
+                wait(0)'s for all children to terminate before calling exit() on the initial process.   
+
+
 ## Screenshots
 
 Here are screenshots from tests showing the lottery scheduler in action:
